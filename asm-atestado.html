@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e3a5f">
     <title>ASM - Atestado Fisioterapêutico</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --azul-marinho: #1e3a5f;
@@ -21,77 +25,99 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--cinza-claro);
-            padding: 15px;
-            line-height: 1.6;
+            background: linear-gradient(135deg, var(--azul-marinho) 0%, #2c4a6e 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
         
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: var(--branco);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, var(--azul-marinho) 0%, #2c4a70 100%);
-            color: var(--branco);
-            padding: 25px;
             text-align: center;
-            border-bottom: 4px solid var(--dourado);
+            color: var(--branco);
+            margin-bottom: 30px;
+            padding: 20px;
         }
         
         .header h1 {
-            font-size: 1.3em;
+            font-size: 1.3rem;
             margin-bottom: 5px;
         }
         
-        .header p {
+        .header h2 {
+            font-size: 1rem;
             color: var(--dourado);
-            font-size: 0.9em;
+            font-weight: normal;
         }
         
-        .content {
+        .form-card {
+            background: var(--branco);
+            border-radius: 20px;
             padding: 25px;
-        }
-        
-        .field-group {
             margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
         
-        label {
-            display: block;
+        .form-title {
             color: var(--azul-marinho);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--dourado);
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        .form-label {
+            display: block;
             font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 0.9em;
+            color: var(--azul-marinho);
+            margin-bottom: 6px;
+            font-size: 0.9rem;
         }
         
-        input[type="text"], input[type="date"], input[type="time"], textarea, select {
+        .form-input {
             width: 100%;
-            padding: 12px;
+            padding: 10px 12px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: inherit;
         }
         
-        input:focus, textarea:focus, select:focus {
+        .form-input:focus {
             outline: none;
-            border-color: var(--azul-marinho);
+            border-color: var(--dourado);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
         }
         
-        textarea {
-            min-height: 80px;
-            resize: vertical;
+        /* DATA AJUSTADA - NÃO SAI DA CAIXA */
+        input[type="date"].form-input,
+        input[type="time"].form-input,
+        input[type="number"].form-input {
+            width: 100%;
+            max-width: 100%;
+            padding: 8px 10px;
+            font-size: 0.9rem;
+        }
+        
+        .prof-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
         
         .checkbox-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             margin: 15px 0;
         }
         
@@ -99,108 +125,149 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            background: var(--cinza-claro);
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
         }
         
         .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             accent-color: var(--azul-marinho);
+            cursor: pointer;
         }
         
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .checkbox-item label {
+            margin: 0;
+            font-weight: 500;
+            color: #444;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
         
-        .signature-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid var(--dourado);
+        .checkbox-item .form-input {
+            flex: 1;
+            min-width: 80px;
+            margin-left: 10px;
         }
         
-        .signature-box {
+        textarea.form-input {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .signature-area {
+            background: var(--branco);
             border: 2px dashed var(--azul-marinho);
             border-radius: 10px;
-            background: var(--cinza-claro);
             margin: 15px 0;
             position: relative;
         }
         
-        .signature-canvas {
+        .signature-pad {
             width: 100%;
             height: 150px;
+            border-radius: 10px;
             touch-action: none;
-            border-radius: 8px;
-            cursor: crosshair;
+            display: block;
         }
         
         .signature-label {
             position: absolute;
-            top: 50%;
+            bottom: 10px;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             color: #999;
+            font-size: 0.85rem;
             pointer-events: none;
-            font-size: 0.9em;
         }
         
-        .signature-label.hidden {
-            display: none;
-        }
-        
-        .signature-actions {
+        .btn-group {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         .btn {
             flex: 1;
-            padding: 12px;
+            min-width: 80px;
+            padding: 15px 20px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 25px;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             transition: all 0.3s;
         }
         
-        .btn-clear {
-            background: #e0e0e0;
-            color: #333;
-        }
-        
-        .btn-save {
-            background: var(--azul-marinho);
-            color: var(--branco);
+        .btn:active {
+            transform: scale(0.95);
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--azul-marinho) 0%, #2c4a70 100%);
-            color: var(--branco);
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            margin-top: 20px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
+            background: linear-gradient(135deg, var(--azul-marinho), #2c4a6e);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.75rem;
+            flex: none;
         }
         
         .footer {
             text-align: center;
-            padding: 15px;
-            color: #999;
-            font-size: 0.8em;
-            border-top: 1px solid #eee;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.75rem;
+            margin-top: 30px;
+            padding: 20px;
         }
         
-        .saved-signature {
-            max-width: 100%;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 9999;
+            font-size: 0.9rem;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        @media (max-width: 600px) {
+            .prof-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -208,221 +275,414 @@
     <div class="container">
         <div class="header">
             <h1>🏥 ASM Gestão Clínica</h1>
-            <p>Gestão Fisioterapêutica</p>
+            <h2>Atestado Fisioterapêutico</h2>
         </div>
         
-        <div class="content">
-            <div class="field-group">
-                <label>Fisioterapeuta</label>
-                <input type="text" id="fisio_nome" placeholder="Nome completo">
-            </div>
-            
-            <div class="field-group">
-                <label>CREFITO</label>
-                <input type="text" id="fisio_crefito" placeholder="Nº do CREFITO">
-            </div>
-            
-            <h3 style="color: var(--azul-marinho); margin: 25px 0 15px; text-align: center;">ATESTADO FISIOTERAPÊUTICO</h3>
-            
-            <div class="field-group">
-                <label>Nome do Paciente</label>
-                <input type="text" id="paciente_nome" placeholder="Nome completo do paciente">
-            </div>
-            
-            <div class="field-group">
-                <label>CPF</label>
-                <input type="text" id="paciente_cpf" placeholder="000.000.000-00">
-            </div>
-            
-            <div class="row">
-                <div class="field-group">
-                    <label>Data</label>
-                    <input type="date" id="data_atendimento">
+        <div class="form-card">
+            <div class="form-title">👤 Dados do Profissional</div>
+            <div class="prof-row">
+                <div class="form-group">
+                    <label class="form-label">Fisioterapeuta</label>
+                    <input type="text" class="form-input" id="fisio_nome" placeholder="Nome completo">
                 </div>
-                <div class="field-group">
-                    <label>Horário Início</label>
-                    <input type="time" id="hora_inicio">
+                <div class="form-group">
+                    <label class="form-label">CREFITO</label>
+                    <input type="text" class="form-input" id="fisio_crefito" placeholder="Nº do CREFITO">
                 </div>
             </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-title">👤 Dados do Paciente</div>
             
-            <div class="field-group">
-                <label>Horário Término</label>
-                <input type="time" id="hora_fim">
+            <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" class="form-input" id="paciente_nome" placeholder="Nome completo do paciente">
             </div>
             
-            <div class="field-group">
-                <label>Necessita de:</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="apenas_comparecimento">
-                        <label for="apenas_comparecimento" style="margin:0; font-weight:normal;">Comparecimento apenas</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="afastamento">
-                        <label for="afastamento" style="margin:0; font-weight:normal;">Afastamento de</label>
-                        <input type="number" id="dias_afastamento" style="width:60px; margin-left:5px;" placeholder="dias">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="restricao">
-                        <label for="restricao" style="margin:0; font-weight:normal;">Restrição funcional</label>
-                    </div>
+            <div class="form-group">
+                <label class="form-label">CPF</label>
+                <input type="text" class="form-input" id="paciente_cpf" placeholder="000.000.000-00">
+            </div>
+            
+            <div class="prof-row">
+                <div class="form-group">
+                    <label class="form-label">Data do Atendimento</label>
+                    <input type="date" class="form-input" id="data_atendimento">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Horário Início</label>
+                    <input type="time" class="form-input" id="hora_inicio">
                 </div>
             </div>
             
-            <div class="field-group">
-                <label>Detalhamento (se necessário)</label>
-                <textarea id="detalhamento" placeholder="Detalhes adicionais..."></textarea>
+            <div class="form-group">
+                <label class="form-label">Horário Término</label>
+                <input type="time" class="form-input" id="hora_fim">
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-title">📝 Necessidade Médica</div>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="apenas_comparecimento">
+                    <label for="apenas_comparecimento">Apenas comparecimento</label>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="afastamento">
+                    <label for="afastamento">Afastamento de</label>
+                    <input type="number" class="form-input" id="dias_afastamento" placeholder="dias" style="width: 80px;">
+                    <span>dias</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="restricao">
+                    <label for="restricao">Restrição funcional</label>
+                </label>
             </div>
             
-            <div class="row">
-                <div class="field-group">
-                    <label>Local</label>
-                    <input type="text" id="local" placeholder="Cidade/UF">
+            <div class="form-group">
+                <label class="form-label">Detalhamento (se necessário)</label>
+                <textarea class="form-input" id="detalhamento" placeholder="Detalhes adicionais..."></textarea>
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-title">📍 Local e Data</div>
+            <div class="prof-row">
+                <div class="form-group">
+                    <label class="form-label">Local</label>
+                    <input type="text" class="form-input" id="local" placeholder="Cidade/UF">
                 </div>
-                <div class="field-group">
-                    <label>Data do Documento</label>
-                    <input type="date" id="data_doc">
+                <div class="form-group">
+                    <label class="form-label">Data do Documento</label>
+                    <input type="date" class="form-input" id="data_doc">
                 </div>
             </div>
+        </div>
+        
+        <div class="form-card">
+            <div class="form-title">✍️ Assinatura Digital</div>
             
-            <!-- ASSINATURA DIGITAL -->
-            <div class="signature-section">
-                <h4 style="color: var(--azul-marinho); margin-bottom: 15px;">✍️ Assinatura Digital</h4>
-                
-                <div class="field-group">
-                    <label>Assinatura do Fisioterapeuta</label>
-                    <div class="signature-box">
-                        <canvas class="signature-canvas" id="canvasFisio"></canvas>
-                        <span class="signature-label" id="labelFisio">Toque aqui para assinar</span>
-                    </div>
-                    <div class="signature-actions">
-                        <button class="btn btn-clear" onclick="clearSignature('canvasFisio', 'labelFisio')">🗑️ Limpar</button>
-                        <button class="btn btn-save" onclick="saveSignature('canvasFisio', 'imgFisio')">💾 Salvar</button>
-                    </div>
-                    <img id="imgFisio" class="saved-signature" style="display:none;">
-                </div>
+            <div class="signature-area">
+                <canvas id="canvasFisio" class="signature-pad"></canvas>
+                <span class="signature-label">Toque e arraste para assinar</span>
             </div>
-            
-            <button class="btn-primary" onclick="gerarPDF()">📄 Gerar Documento</button>
-            <button class="btn-primary" onclick="compartilharWhatsApp()" style="background: #25d366; margin-top: 10px;">📱 Enviar WhatsApp</button>
+            <div class="btn-group" style="margin-top: 10px;">
+                <button class="btn btn-danger btn-small" onclick="limparAssinatura()">🗑️ Limpar</button>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="salvarDocumento()">
+                💾 Salvar
+            </button>
+            <button class="btn btn-success" onclick="gerarPDF()">
+                📄 PDF
+            </button>
+            <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+                💬 WhatsApp
+            </button>
         </div>
         
         <div class="footer">
-            ASM Gestão Clínica - Uso Licenciado<br>
-            Dra. Andresa Augusto
+            <p>ASM Gestão Clínica - Uso Licenciado</p>
+            <p>© Dra. Andresa Augusto Nascimento</p>
+            <p>Proibida reprodução ou compartilhamento sem autorização</p>
         </div>
     </div>
+    
+    <div id="toast" class="toast"></div>
 
     <script>
-        // Configuração dos canvas de assinatura
-        function setupCanvas(canvasId, labelId) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
-            const label = document.getElementById(labelId);
+        // Canvas de assinatura
+        const canvas = document.getElementById('canvasFisio');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false;
+        
+        function initCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 4;
+            canvas.height = 150;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initCanvas();
+            carregarDados();
             
-            // Ajustar tamanho do canvas
-            function resizeCanvas() {
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                ctx.strokeStyle = '#1e3a5f';
-                ctx.lineWidth = 2;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-            }
-            
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-            
-            function getPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
-            }
-            
-            function startDrawing(e) {
+            // Eventos do mouse
+            canvas.addEventListener('mousedown', (e) => {
                 isDrawing = true;
-                const pos = getPos(e);
-                lastX = pos.x;
-                lastY = pos.y;
-                label.classList.add('hidden');
-                e.preventDefault();
-            }
-            
-            function draw(e) {
-                if (!isDrawing) return;
-                const pos = getPos(e);
+                const rect = canvas.getBoundingClientRect();
                 ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-                lastX = pos.x;
-                lastY = pos.y;
-                e.preventDefault();
-            }
+                ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                canvas.parentElement.querySelector('.signature-label').style.display = 'none';
+            });
             
-            function stopDrawing() {
-                isDrawing = false;
-            }
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                ctx.stroke();
+                hasSignature = true;
+            });
+            
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
             
             // Eventos touch
-            canvas.addEventListener('touchstart', startDrawing, {passive: false});
-            canvas.addEventListener('touchmove', draw, {passive: false});
-            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                ctx.beginPath();
+                ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                canvas.parentElement.querySelector('.signature-label').style.display = 'none';
+            }, {passive: false});
             
-            // Eventos mouse
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+                hasSignature = true;
+            }, {passive: false});
             
-            return canvas;
-        }
+            canvas.addEventListener('touchend', () => isDrawing = false);
+            
+            // Datas automáticas
+            document.getElementById('data_atendimento').valueAsDate = new Date();
+            document.getElementById('data_doc').valueAsDate = new Date();
+        });
         
-        // Inicializar canvas
-        setupCanvas('canvasFisio', 'labelFisio');
-        
-        // Limpar assinatura
-        function clearSignature(canvasId, labelId) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
+        function limparAssinatura() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById(labelId).classList.remove('hidden');
-            document.getElementById(canvasId.replace('canvas', 'img')).style.display = 'none';
+            hasSignature = false;
+            canvas.parentElement.querySelector('.signature-label').style.display = 'block';
         }
         
-        // Salvar assinatura
-        function saveSignature(canvasId, imgId) {
-            const canvas = document.getElementById(canvasId);
-            const img = document.getElementById(imgId);
-            img.src = canvas.toDataURL('image/png');
-            img.style.display = 'block';
-            alert('✅ Assinatura salva!');
-        }
-        
-        // Gerar documento (simulação)
-        function gerarPDF() {
-            alert('📄 Documento gerado com sucesso!\n\nTodos os dados foram salvos.');
-        }
-        
-        // Compartilhar WhatsApp
-        function compartilharWhatsApp() {
+        function salvarDocumento() {
             const nome = document.getElementById('paciente_nome').value;
-            const texto = `Olá ${nome}! Segue seu Atestado Fisioterapêutico da ASM Gestão Clínica.`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+            if (!nome) {
+                mostrarToast('⚠️ Informe o nome do paciente');
+                return;
+            }
+            
+            const doc = {
+                tipo: 'Atestado',
+                fisio_nome: document.getElementById('fisio_nome').value,
+                fisio_crefito: document.getElementById('fisio_crefito').value,
+                paciente_nome: nome,
+                paciente_cpf: document.getElementById('paciente_cpf').value,
+                data_atendimento: document.getElementById('data_atendimento').value,
+                hora_inicio: document.getElementById('hora_inicio').value,
+                hora_fim: document.getElementById('hora_fim').value,
+                apenas_comparecimento: document.getElementById('apenas_comparecimento').checked,
+                afastamento: document.getElementById('afastamento').checked,
+                dias_afastamento: document.getElementById('dias_afastamento').value,
+                restricao: document.getElementById('restricao').checked,
+                detalhamento: document.getElementById('detalhamento').value,
+                local: document.getElementById('local').value,
+                data_doc: document.getElementById('data_doc').value,
+                assinatura: hasSignature ? canvas.toDataURL() : null
+            };
+            
+            localStorage.setItem('atestado_' + nome, JSON.stringify(doc));
+            
+            // Salvar dados do fisioterapeuta
+            const dadosFisio = {
+                fisio_nome: doc.fisio_nome,
+                fisio_crefito: doc.fisio_crefito
+            };
+            localStorage.setItem('asm_dados', JSON.stringify(dadosFisio));
+            
+            mostrarToast('✅ Atestado salvo com sucesso!');
         }
         
-        // Preencher datas automaticamente
-        document.getElementById('data_atendimento').valueAsDate = new Date();
-        document.getElementById('data_doc').valueAsDate = new Date();
+        function carregarDados() {
+            // Carregar dados do fisioterapeuta
+            const dados = JSON.parse(localStorage.getItem('asm_dados') || '{}');
+            if (dados.fisio_nome) document.getElementById('fisio_nome').value = dados.fisio_nome;
+            if (dados.fisio_crefito) document.getElementById('fisio_crefito').value = dados.fisio_crefito;
+            
+            // Carregar último atestado
+            const chaves = Object.keys(localStorage).filter(k => k.startsWith('atestado_'));
+            if (chaves.length > 0) {
+                const ultimo = localStorage.getItem(chaves[chaves.length - 1]);
+                const doc = JSON.parse(ultimo);
+                
+                document.getElementById('paciente_nome').value = doc.paciente_nome || '';
+                document.getElementById('paciente_cpf').value = doc.paciente_cpf || '';
+                document.getElementById('data_atendimento').value = doc.data_atendimento || '';
+                document.getElementById('hora_inicio').value = doc.hora_inicio || '';
+                document.getElementById('hora_fim').value = doc.hora_fim || '';
+                document.getElementById('apenas_comparecimento').checked = doc.apenas_comparecimento || false;
+                document.getElementById('afastamento').checked = doc.afastamento || false;
+                document.getElementById('dias_afastamento').value = doc.dias_afastamento || '';
+                document.getElementById('restricao').checked = doc.restricao || false;
+                document.getElementById('detalhamento').value = doc.detalhamento || '';
+                document.getElementById('local').value = doc.local || '';
+                document.getElementById('data_doc').value = doc.data_doc || '';
+                
+                if (doc.assinatura) {
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0);
+                        hasSignature = true;
+                        canvas.parentElement.querySelector('.signature-label').style.display = 'none';
+                    };
+                    img.src = doc.assinatura;
+                }
+            }
+        }
+        
+        async function gerarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const nome = document.getElementById('paciente_nome').value || 'Paciente';
+            
+            // Cabeçalho
+            doc.setFillColor(30, 58, 95);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            doc.setTextColor(201, 162, 39);
+            doc.setFontSize(18);
+            doc.text('ASM Gestão Clínica', 105, 15, { align: 'center' });
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.text('Atestado Fisioterapêutico', 105, 25, { align: 'center' });
+            
+            let y = 50;
+            
+            // Profissional
+            doc.setTextColor(30, 58, 95);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('PROFISSIONAL', 20, y);
+            y += 10;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            doc.text(`Nome: ${document.getElementById('fisio_nome').value || '_________________________________'}`, 20, y);
+            y += 7;
+            doc.text(`CREFITO: ${document.getElementById('fisio_crefito').value || '_________________________________'}`, 20, y);
+            
+            // Paciente
+            y += 15;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.text('PACIENTE', 20, y);
+            y += 10;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            doc.text(`Nome: ${nome}`, 20, y);
+            y += 7;
+            doc.text(`CPF: ${document.getElementById('paciente_cpf').value || '_________________________________'}`, 20, y);
+            y += 7;
+            doc.text(`Data: ${document.getElementById('data_atendimento').value ? new Date(document.getElementById('data_atendimento').value).toLocaleDateString('pt-BR') : '___/___/_____'}`, 20, y);
+            y += 7;
+            doc.text(`Horário: ${document.getElementById('hora_inicio').value || '_____'} às ${document.getElementById('hora_fim').value || '_____'}`, 20, y);
+            
+            // Necessidade
+            y += 15;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.text('ATESTO QUE O PACIENTE NECESSITA DE:', 20, y);
+            y += 10;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            
+            if (document.getElementById('apenas_comparecimento').checked) {
+                doc.text('• Apenas comparecimento', 20, y);
+                y += 7;
+            }
+            if (document.getElementById('afastamento').checked) {
+                const dias = document.getElementById('dias_afastamento').value;
+                doc.text(`• Afastamento de ${dias || '_____'} dias`, 20, y);
+                y += 7;
+            }
+            if (document.getElementById('restricao').checked) {
+                doc.text('• Restrição funcional', 20, y);
+                y += 7;
+            }
+            
+            // Detalhamento
+            const detalhamento = document.getElementById('detalhamento').value;
+            if (detalhamento) {
+                y += 5;
+                doc.setFont(undefined, 'bold');
+                doc.text('DETALHAMENTO:', 20, y);
+                y += 7;
+                doc.setFont(undefined, 'normal');
+                const linhas = doc.splitTextToSize(detalhamento, 170);
+                doc.text(linhas, 20, y);
+                y += linhas.length * 5;
+            }
+            
+            // Local e data
+            y += 15;
+            doc.text(`Local: ${document.getElementById('local').value || '____________________'}`, 20, y);
+            y += 7;
+            doc.text(`Data: ${document.getElementById('data_doc').value ? new Date(document.getElementById('data_doc').value).toLocaleDateString('pt-BR') : '___/___/_____'}`, 20, y);
+            
+            // Assinatura
+            y += 20;
+            doc.setFont(undefined, 'bold');
+            doc.text('ASSINATURA DO FISIOTERAPEUTA', 20, y);
+            y += 10;
+            
+            if (hasSignature) {
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 20, y, 80, 30);
+                y += 35;
+            } else {
+                doc.line(20, y, 100, y);
+                y += 5;
+            }
+            
+            // Rodapé
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('ASM Gestão Clínica -- Uso Licenciado', 105, 285, { align: 'center' });
+            doc.text('© ASM Gestão Clínica -- Dra. Andresa Augusto Nascimento | Uso licenciado ao comprador.', 105, 290, { align: 'center' });
+            doc.text('Proibida reprodução ou compartilhamento sem autorização.', 105, 295, { align: 'center' });
+            
+            doc.save(`Atestado_${nome}.pdf`);
+            mostrarToast('📄 PDF gerado com sucesso!');
+        }
+        
+        function enviarWhatsApp() {
+            const nome = document.getElementById('paciente_nome').value;
+            const data = document.getElementById('data_atendimento').value;
+            
+            let mensagem = `*Atestado Fisioterapêutico - ASM Gestão Clínica*%0A%0A`;
+            mensagem += `Paciente: ${nome}%0A`;
+            mensagem += `Data: ${data}%0A%0A`;
+            mensagem += `Documento disponível em PDF.`;
+            
+            window.open(`https://wa.me/?text=${mensagem}`, '_blank');
+        }
+        
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        window.addEventListener('resize', initCanvas);
     </script>
 </body>
 </html>
